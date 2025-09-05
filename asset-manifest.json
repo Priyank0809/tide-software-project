@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/tide-software-project/static/css/main.38c242a0.css",
-    "main.js": "/tide-software-project/static/js/main.ba181537.js",
+    "main.js": "/tide-software-project/static/js/main.b1d9d66f.js",
     "static/js/453.89fc23dd.chunk.js": "/tide-software-project/static/js/453.89fc23dd.chunk.js",
     "index.html": "/tide-software-project/index.html",
     "main.38c242a0.css.map": "/tide-software-project/static/css/main.38c242a0.css.map",
-    "main.ba181537.js.map": "/tide-software-project/static/js/main.ba181537.js.map",
+    "main.b1d9d66f.js.map": "/tide-software-project/static/js/main.b1d9d66f.js.map",
     "453.89fc23dd.chunk.js.map": "/tide-software-project/static/js/453.89fc23dd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.38c242a0.css",
-    "static/js/main.ba181537.js"
+    "static/js/main.b1d9d66f.js"
   ]
 }
