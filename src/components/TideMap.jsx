@@ -37,20 +37,23 @@ export default function TideMap({ coords }) {
       <h3>Map</h3>
       <div className="map-wrapper">
         {coords ? (
-          <MapContainer
-            center={[coords.lat, coords.lon]}
-            zoom={8}
-            className="map-container"
-            whenCreated={handleMapCreated}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[coords.lat, coords.lon]}>
-              <Popup>Your Location</Popup>
-            </Marker>
-          </MapContainer>
+          <>
+            <p className="small">Showing saved/current location</p>
+            <MapContainer
+              center={[coords.lat, coords.lon]}
+              zoom={8}
+              className="map-container"
+              whenCreated={handleMapCreated}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={[coords.lat, coords.lon]}>
+                <Popup>Your Location</Popup>
+              </Marker>
+            </MapContainer>
+          </>
         ) : (
           <p className="small">No location yet...</p>
         )}

@@ -13,15 +13,16 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 export default function TideChart({ events }) {
-  const labels = events.map((e) => e.date.format("DD HH:mm"));
+  const labels = (events || []).map((e) => e.date.format("DD HH:mm"));
   const data = {
     labels,
     datasets: [
       {
         label: "Tide height (m)",
-        data: events.map((e) => e.height),
+        data: (events || []).map((e) => e.height),
         borderColor: "blue",
         tension: 0.4,
+        fill: false,
       },
     ],
   };

@@ -41,7 +41,8 @@ export default function App() {
         const w = await getWeather(coords.lat, coords.lon);
         setWeather(w);
       } catch (e) {
-        setError("Failed to load tide/weather data. Check API keys.");
+        console.error(e);
+        setError("Failed to load tide/weather data. Check API keys and network.");
       }
     }
     fetchData();
@@ -54,7 +55,7 @@ export default function App() {
       setCoords({ lat: 25.7907, lon: -80.1300 });
       return;
     }
-  
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
@@ -64,14 +65,14 @@ export default function App() {
       (err) => {
         // Show the real error message
         setError("Location error: " + err.message);
-  
+
         // fallback to Miami Beach
         setCoords({ lat: 25.7907, lon: -80.1300 });
       },
       {
         enableHighAccuracy: true, // ask for GPS if available
-        timeout: 10000,           // wait up to 10s
-        maximumAge: 0             // don’t use cached position
+        timeout: 10000, // wait up to 10s
+        maximumAge: 0, // don’t use cached position
       }
     );
   }
@@ -89,7 +90,13 @@ export default function App() {
         <p className="small">Nearest coast: {coastName}</p>
         <p>Current time: {now.format("YYYY-MM-DD HH:mm:ss")}</p>
 
-        <TideInfo events={tides} now={now} coastName={coastName} onRefresh={requestLocation} clearSaved={clearSaved} />
+        <TideInfo
+          events={tides}
+          now={now}
+          coastName={coastName}
+          onRefresh={requestLocation}
+          clearSaved={clearSaved}
+        />
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         <TideChart events={tides} />
@@ -104,7 +111,11 @@ export default function App() {
           </div>
         )}
 
-        <TideAlerts events={tides} enabled={alertsEnabled} setEnabled={setAlertsEnabled} />
+        <TideAlerts
+          events={tides}
+          enabled={alertsEnabled}
+          setEnabled={setAlertsEnabled}
+        />
       </div>
     </div>
   );
