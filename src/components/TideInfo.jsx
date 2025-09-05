@@ -1,70 +1,19 @@
 import React from "react";
 import { formatDate, detailedCountdown } from "../utils/timeUtils";
 
-export default function TideInfo({ events, now, coastName, onRefresh, clearSaved }) {
-  // helper: find next event of a type
-  const next = (type) =>
-    events.find((e) => e.date.isAfter(now) && (!type || e.type === type));
+export default function TideInfo({ events = [], now, coastName, onRefresh, clearSaved }) {
+  // sort events just in case
+  const sorted = [...events].sort((a, b) => a.date.diff(b.date));
 
-  // helper: find previous event of a type
-  const prev = (type) => {
-    const pastEvents = events.filter((e) => e.date.isBefore(now) && (!type || e.type === type));
-    return pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
-  };
+  const nextOfType = (type) => sorted.find((e) => e.date.isAfter(now) && (!type || e.type === type));
 
-  const nextHigh = next("High");
-  const nextLow = next("Low");
-  const prevHigh = prev("High");
-  const prevLow = prev("Low");
-
-  // helper: show how long ago (for previous events)
-  const timeSince = (date) => {
-    const diff = now.diff(date, "second");
-    if (diff <= 0) return "just now";
-    const hours = Math.floor(diff / 3600);
-    const minutes = Math.floor((diff % 3600) / 60);
-    const seconds = diff % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ago`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s ago`;
-    }
-    return `${seconds}s ago`;
-  };
+  const nextHigh = nextOfType("High");
+  const nextLow = nextOfType("Low");
 
   return (
     <div className="card">
       <h2>Tide Info</h2>
       <p className="small">Nearest Coast: {coastName}</p>
-
-      <section style={{ marginTop: 8 }}>
-        <h3>Prev High Tide 🌊</h3>
-        {prevHigh ? (
-          <p>
-            {formatDate(prevHigh.date)} — <strong>{prevHigh.height} m</strong>{" "}
-            <small style={{ marginLeft: 8, color: "#555" }}>
-              ({timeSince(prevHigh.date)})
-            </small>
-          </p>
-        ) : (
-          <p>No data</p>
-        )}
-      </section>
-
-      <section style={{ marginTop: 8 }}>
-        <h3>Prev Low Tide 🏖️</h3>
-        {prevLow ? (
-          <p>
-            {formatDate(prevLow.date)} — <strong>{prevLow.height} m</strong>{" "}
-            <small style={{ marginLeft: 8, color: "#555" }}>
-              ({timeSince(prevLow.date)})
-            </small>
-          </p>
-        ) : (
-          <p>No data</p>
-        )}
-      </section>
 
       <section style={{ marginTop: 8 }}>
         <h3>Next High Tide 🌊</h3>

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeDefault = 15 }) {
   const timeoutRef = useRef(null);
   const intervalRef = useRef(null);
-  const notifiedEvents = useRef(new Set()); // ✅ track notified events
+  const notifiedEvents = useRef(new Set()); // track notified events
 
   const [minutesBefore, setMinutesBefore] = useState(minutesBeforeDefault);
   const [heightThreshold, setHeightThreshold] = useState(2.5); // meters
@@ -54,7 +54,6 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
         const ms = fireAt.getTime() - Date.now();
 
         if (ms <= 0) {
-          // notify immediately (once)
           if (!notifiedEvents.current.has(next.date.unix())) {
             new Notification(`Upcoming ${next.type} tide`, {
               body: `${next.date.format("YYYY-MM-DD HH:mm")} (${next.height} m)`,
@@ -82,7 +81,7 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
           new Notification("Extreme tide alert ⚠️", { body });
           notifiedEvents.current.add(extreme2.date.unix());
         }
-      }, 10 * 60 * 1000);
+      }, 10 * 60 * 1000); // 10 minutes
     });
 
     return () => clearAll();
@@ -128,11 +127,6 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
           />
         </label>
       </div>
-
-      <p className="small">
-        Tip: Notifications fire once per event. You’ll get alerted for the next tide (if scheduled)
-        and for extreme tides above the threshold.
-      </p>
     </div>
   );
 }
