@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeDefault = 15 }) {
   const timeoutRef = useRef(null);
   const intervalRef = useRef(null);
+  const notifiedEvents = useRef(new Set()); // ✅ track notified events
+
   const [minutesBefore, setMinutesBefore] = useState(minutesBeforeDefault);
   const [heightThreshold, setHeightThreshold] = useState(2.5); // meters
 
   useEffect(() => {
-    // cleanup helpers
     function clearAll() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -17,6 +18,7 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      notifiedEvents.current.clear(); // reset when disabling
     }
 
     if (!enabled) {
@@ -36,15 +38,15 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
         return;
       }
 
-      // find the next tide event
       const now = new Date();
       const next = events.find((e) => e.date.toDate() > now);
-
-      // send immediate notification for any "extreme" tide (height >= threshold) within the events list (upcoming)
       const extreme = events.find((e) => e.date.toDate() > now && e.height >= heightThreshold);
-      if (extreme) {
+
+      // 🔹 Extreme tide: notify once
+      if (extreme && !notifiedEvents.current.has(extreme.date.unix())) {
         const body = `Extreme ${extreme.type} tide at ${extreme.date.format("YYYY-MM-DD HH:mm")} — ${extreme.height} m`;
         new Notification("Extreme tide alert ⚠️", { body });
+        notifiedEvents.current.add(extreme.date.unix());
       }
 
       if (next) {
@@ -52,35 +54,38 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
         const ms = fireAt.getTime() - Date.now();
 
         if (ms <= 0) {
-          // if the scheduled time already passed, notify immediately
-          new Notification(`Upcoming ${next.type} tide`, {
-            body: `${next.date.format("YYYY-MM-DD HH:mm")} (${next.height} m)`,
-          });
-        } else {
-          timeoutRef.current = setTimeout(() => {
+          // notify immediately (once)
+          if (!notifiedEvents.current.has(next.date.unix())) {
             new Notification(`Upcoming ${next.type} tide`, {
               body: `${next.date.format("YYYY-MM-DD HH:mm")} (${next.height} m)`,
             });
+            notifiedEvents.current.add(next.date.unix());
+          }
+        } else {
+          timeoutRef.current = setTimeout(() => {
+            if (!notifiedEvents.current.has(next.date.unix())) {
+              new Notification(`Upcoming ${next.type} tide`, {
+                body: `${next.date.format("YYYY-MM-DD HH:mm")} (${next.height} m)`,
+              });
+              notifiedEvents.current.add(next.date.unix());
+            }
           }, ms);
         }
       }
 
-      // As a safety: keep a periodic check (every 10 minutes) to re-evaluate events and thresholds,
-      // so that if user keeps the app open we send alerts for newly available extremes.
+      // 🔹 periodic check: only fire new extreme events
       intervalRef.current = setInterval(() => {
         const now2 = new Date();
         const extreme2 = events.find((e) => e.date.toDate() > now2 && e.height >= heightThreshold);
-        if (extreme2) {
+        if (extreme2 && !notifiedEvents.current.has(extreme2.date.unix())) {
           const body = `Extreme ${extreme2.type} tide at ${extreme2.date.format("YYYY-MM-DD HH:mm")} — ${extreme2.height} m`;
           new Notification("Extreme tide alert ⚠️", { body });
+          notifiedEvents.current.add(extreme2.date.unix());
         }
-      }, 10 * 60 * 1000); // 10 minutes
+      }, 10 * 60 * 1000);
     });
 
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => clearAll();
   }, [enabled, events, minutesBefore, heightThreshold, setEnabled]);
 
   return (
@@ -125,8 +130,8 @@ export default function TideAlerts({ events, enabled, setEnabled, minutesBeforeD
       </div>
 
       <p className="small">
-        Tip: use the threshold to get notified if upcoming tide height crosses a value (e.g.,
-        storm/high tides). Notifications require browser permission.
+        Tip: Notifications fire once per event. You’ll get alerted for the next tide (if scheduled)
+        and for extreme tides above the threshold.
       </p>
     </div>
   );
